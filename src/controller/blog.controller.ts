@@ -1,13 +1,13 @@
 import type { RequestHandler } from "express";
 import { z } from "zod";
-import Blog from "../models/blog.model.ts";
-import User from "../models/user.ts";
+import Blog from "../models/blog.model.js";
+import User from "../models/user.js";
 import {
   createBlogSchema,
   updateBlogSchema,
   blogIdSchema,
   blogQuerySchema,
-} from "../validation/blog.validation.ts";
+} from "../validation/blog.validation.js";
 
 const makeSlug = (title: string): string => {
   const base = title

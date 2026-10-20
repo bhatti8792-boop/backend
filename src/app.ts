@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import authRoutes from "./routes/auth.routes.ts";
-import blogRoutes from "./routes/blog.routes.ts";
-import uploadRoutes from "./routes/upload.routes.ts";
-import contactRoutes from "./routes/contact.routes.ts";
+import authRoutes from "./routes/auth.routes.js";
+import blogRoutes from "./routes/blog.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
+import contactRoutes from "./routes/contact.routes.js";
 const app = express();
 
 app.use(

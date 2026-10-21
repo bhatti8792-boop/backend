@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
+import authRoutes from "./routes/auth.routes"
 const app = express();
 
 app.use(cors({
@@ -21,7 +21,6 @@ app.get("/", (_req, res) => {
 });
 
 // Add your existing routes here
-// app.use("/api/auth", authRoutes);
-// app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
 
 export default app;

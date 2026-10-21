@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import { z } from "zod";
-import Blog from "../models/blog.model.js";
-import User from "../models/user.js";
+import Blog from "../models/blog.model.ts";
+import User from "../models/user.ts";
 import {
   createBlogSchema,
   updateBlogSchema,

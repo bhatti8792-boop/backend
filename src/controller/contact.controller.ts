@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
-import Contact, { CONTACT_SERVICES } from "../models/contact.model.js";
+import Contact, { CONTACT_SERVICES } from "../models/contact.model.ts";
 
 export const createContact = async (
   req: Request,

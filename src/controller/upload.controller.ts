@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import cloudinary from "../config/cloudinary.js";
+import cloudinary from "../config/cloudinary.ts";
 
 export const uploadFile: RequestHandler = async (req, res, next) => {
   try {

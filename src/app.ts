@@ -14,14 +14,18 @@ import blogsRoutes from "./routes/blog.routes.js";
 
 const app = express();
 
-// CORS
+const allowedOrigins = [
+  "http://localhost:5173",             
+  "https://fiscora-six.vercel.app/",              
+  "https://fiscora.us/",   
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL,
+    origin: allowedOrigins,
     credentials: true,
   })
 );
-
 // MIDDLEWARE
 app.use(express.json());
 app.use(cookieParser());

@@ -16,7 +16,7 @@ const cached: MongooseCache =
 const connectDB = async (): Promise<typeof mongoose> => {
   if (cached.conn) return cached.conn;
 
-  const uri = process.env.MONGO_URI;
+ const uri = process.env.MONGO_URI || "mongodb+srv://bhatti8792_db_user:v3zL7pNp0awLfZXU@cluster0.gkkac98.mongodb.net/";
   if (!uri) {
     throw new Error("MONGO_URI is not defined in environment variables");
   }

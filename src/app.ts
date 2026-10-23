@@ -45,11 +45,16 @@ app.use(async (_req, _res, next) => {
 });
 
 // API ROUTES
-app.use("/auth", authRoutes);
-app.use("/contact", contactRoutes);
-app.use("/jobs", jobRoutes);
-app.use("/upload", uploadRoutes);
-app.use("/blogs", blogsRoutes);
+const apiRouter = express.Router();
+
+apiRouter.use("/auth", authRoutes);
+apiRouter.use("/contact", contactRoutes);
+apiRouter.use("/jobs", jobRoutes);
+apiRouter.use("/upload", uploadRoutes);
+apiRouter.use("/blogs", blogsRoutes);
+
+app.use("/api", apiRouter); // /api/auth/login
+app.use("/", apiRouter); // /auth/login
 
 // 404 HANDLER
 app.use((_req, res) => {

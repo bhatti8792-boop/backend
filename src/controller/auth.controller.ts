@@ -1,5 +1,6 @@
 import type { CookieOptions, RequestHandler } from "express";
 import bcrypt from "bcryptjs";
+import { ZodError } from "zod";
 import jwt from "jsonwebtoken";
 import User from "../models/user.ts";
 import { registerSchema, loginSchema } from "../validation/auth.validation.ts";
@@ -47,34 +48,55 @@ const publicUser = (user: {
 });
 
 export const register: RequestHandler = async (req, res) => {
-  const data = registerSchema.parse(req.body);
+  try {
+    const data = registerSchema.parse(req.body);
 
-  const existingUser = await User.exists({ email: data.email });
-
-  if (existingUser) {
-    res.status(409).json({
-      success: false,
-      message: "An account with this email already exists",
+    const existingUser = await User.exists({
+      email: data.email,
     });
-    return;
+
+    if (existingUser) {
+      res.status(409).json({
+        success: false,
+        message: "An account with this email already exists",
+      });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(data.password, 12);
+
+    const user = await User.create({
+      fullName: data.fullName,
+      email: data.email,
+      passwordHash,
+      role: "USER",
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Account created successfully",
+      data: {
+        user: publicUser(user),
+      },
+    });
+  } catch (error) {
+    console.error("REGISTER ERROR:", error);
+
+    if (error instanceof ZodError) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid registration data",
+        errors: error.issues,
+      });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
-
-  const passwordHash = await bcrypt.hash(data.password, 12);
-
-  const user = await User.create({
-    fullName: data.fullName,
-    email: data.email,
-    passwordHash,
-    role: "USER",
-  });
-
-  res.status(201).json({
-    success: true,
-    message: "Account created successfully",
-    data: { user: publicUser(user) },
-  });
 };
-
 export const login: RequestHandler = async (req, res) => {
   const data = loginSchema.parse(req.body);
 

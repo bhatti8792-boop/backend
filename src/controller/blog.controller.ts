@@ -73,7 +73,12 @@ export const createBlog: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const getBlogs: RequestHandler = async (req, res, next) => {
+
+export const getBlogs: RequestHandler = async (
+  req,
+  res,
+  next
+) => {
   try {
     const parsed = blogQuerySchema.safeParse(req.query);
 
@@ -88,21 +93,21 @@ export const getBlogs: RequestHandler = async (req, res, next) => {
 
     const { page, limit, status } = parsed.data;
 
-    // Public requests can only retrieve published blogs.
-    const filter: Record<string, unknown> = {
-      status: "PUBLISHED",
-    };
+    // Admin can see both DRAFT and PUBLISHED blogs
+    const filter: Record<string, unknown> = {};
 
-    // Do not allow query parameters to expose drafts.
-    void status;
+    if (status === "DRAFT" || status === "PUBLISHED") {
+      filter.status = status;
+    }
 
     const [blogs, total] = await Promise.all([
       Blog.find(filter)
         .populate("author", "fullName")
-        .sort({ publishedAt: -1, createdAt: -1 })
+        .sort({ createdAt: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
+
       Blog.countDocuments(filter),
     ]);
 
@@ -120,6 +125,7 @@ export const getBlogs: RequestHandler = async (req, res, next) => {
     next(error);
   }
 };
+
 
 export const getBlogById: RequestHandler = async (req, res, next) => {
   try {

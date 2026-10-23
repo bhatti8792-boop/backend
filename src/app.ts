@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -6,11 +5,12 @@ import multer from "multer";
 
 import type { ErrorRequestHandler } from "express";
 
-import authRoutes from "./routes/auth.routes";
-import contactRoutes from "./routes/contact.routes";
-import uploadRoutes from "./routes/upload.routes";
-import jobRoutes from "./routes/career.routes";
-import blogsRoutes from "./routes/blog.routes"
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/auth.routes.js";
+import contactRoutes from "./routes/contact.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
+import jobRoutes from "./routes/career.routes.js";
+import blogsRoutes from "./routes/blog.routes.js";
 
 const app = express();
 
@@ -26,12 +26,22 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-// HEALTH CHECK
+// HEALTH CHECK (no DB needed)
 app.get("/", (_req, res) => {
   res.json({
     success: true,
     message: "Fiscora API is running",
   });
+});
+
+// DB CONNECTION (runs before all API routes)
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 // API ROUTES
@@ -50,12 +60,7 @@ app.use((_req, res) => {
 });
 
 // GLOBAL ERROR HANDLER
-const errorHandler: ErrorRequestHandler = (
-  err: unknown,
-  req,
-  res,
-  next
-) => {
+const errorHandler: ErrorRequestHandler = (err: unknown, req, res, next) => {
   console.error("========== BACKEND ERROR ==========");
   console.error("METHOD:", req.method);
   console.error("URL:", req.originalUrl);
@@ -67,7 +72,6 @@ const errorHandler: ErrorRequestHandler = (
     return;
   }
 
-  // MULTER ERROR
   if (err instanceof multer.MulterError) {
     res.status(400).json({
       success: false,
@@ -77,20 +81,13 @@ const errorHandler: ErrorRequestHandler = (
     return;
   }
 
-  // EXTRACT ERROR MESSAGE
   let message = "Internal server error";
-
   if (err instanceof Error) {
     message = err.message;
-  } else if (
-    typeof err === "object" &&
-    err !== null &&
-    "message" in err
-  ) {
-    message = String(err.message);
+  } else if (typeof err === "object" && err !== null && "message" in err) {
+    message = String((err as { message: unknown }).message);
   }
 
-  // JSON ERROR RESPONSE
   res.status(500).json({
     success: false,
     message:

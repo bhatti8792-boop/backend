@@ -1,28 +1,41 @@
 import mongoose from "mongoose";
 
-const connectDB = async (): Promise<void> => {
-  try {
-    const uri = process.env.MONGODB_URI?.trim();
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
 
-    if (!uri) {
-      throw new Error("MONGODB_URI is missing from .env");
-    }
+const globalWithMongoose = globalThis as typeof globalThis & {
+  mongooseCache?: MongooseCache;
+};
 
-    if (!uri.startsWith("mongodb://") && !uri.startsWith("mongodb+srv://")) {
-      throw new Error(
-        `Invalid MongoDB URI scheme. Received: ${uri.split(":")[0]}`,
-      );
-    }
+const cached: MongooseCache =
+  globalWithMongoose.mongooseCache ??
+  (globalWithMongoose.mongooseCache = { conn: null, promise: null });
 
-    const connection = await mongoose.connect(uri);
+const connectDB = async (): Promise<typeof mongoose> => {
+  if (cached.conn) return cached.conn;
 
-    console.log(
-      `MongoDB connected successfully: ${connection.connection.host}`,
-    );
-  } catch (error) {
-    console.error("MongoDB connection failed:", error);
-    process.exit(1);
+  const uri = process.env.MONGO_URI;
+  if (!uri) {
+    throw new Error("MONGO_URI is not defined in environment variables");
   }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(uri, {
+      bufferCommands: false,
+      serverSelectionTimeoutMS: 8000,
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (err) {
+    cached.promise = null; // allow retry on next request
+    throw err;
+  }
+
+  return cached.conn;
 };
 
 export default connectDB;

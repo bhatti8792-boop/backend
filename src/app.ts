@@ -13,17 +13,18 @@ import jobRoutes from "./routes/career.routes.js";
 import blogsRoutes from "./routes/blog.routes.js";
 
 const app = express();
-
 const allowedOrigins = [
-  "http://localhost:5173",             
-  "https://fiscora-six.vercel.app/",              
-  "https://fiscora.us/",   
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://fiscora-six.vercel.app",
 ];
 
 app.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 // MIDDLEWARE
